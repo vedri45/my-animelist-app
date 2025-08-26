@@ -1,8 +1,12 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getAnimeById } from '$lib/api/jikan';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
+  // Require authentication
+  if (!locals.user) {
+    throw redirect(302, '/login');
+  }
   try {
     const animeId = params.id;
     if (!animeId) {
