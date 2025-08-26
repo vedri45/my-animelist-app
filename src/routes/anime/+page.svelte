@@ -24,6 +24,38 @@
       day: 'numeric' 
     }).format(date);
   }
+  
+  async function quickAddAnime(anime: any) {
+    try {
+      const response = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          malId: anime.mal_id,
+          title: anime.title,
+          imageUrl: anime.images.jpg.large_image_url || anime.images.jpg.image_url,
+          status: 'plan_to_watch',
+          progress: 0
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.action === 'created') {
+          alert('Anime added to your watch list!');
+        } else if (result.action === 'updated') {
+          alert('Anime already in your watch list!');
+        }
+      } else {
+        alert('Failed to add anime to watch list');
+      }
+    } catch (error) {
+      console.error('Error adding to watchlist:', error);
+      alert('Error adding anime to watch list');
+    }
+  }
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -43,7 +75,18 @@
             loading="lazy"
           />
           <div class="absolute top-2 right-2 flex flex-col gap-2">
-            
+            <button
+              on:click={(e) => {
+                e.preventDefault();
+                quickAddAnime(anime);
+              }}
+              class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center self-end gap-1 transition-colors"
+              title="Add to Watch List"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+            </button>
           </div>
         </div>
         

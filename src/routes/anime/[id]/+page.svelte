@@ -7,6 +7,10 @@
   
   let activeTab = 'overview';
   let showTrailer = false;
+  let quickAddStatus = 'plan_to_watch';
+  let quickAddScore = 0;
+  let quickAddProgress = 0;
+  let isAddingToWatchlist = false;
   
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Unknown';
@@ -32,6 +36,45 @@
     };
     return statusClasses[status as keyof typeof statusClasses] || statusClasses.default;
   };
+  
+  async function quickAddToWatchlist() {
+    if (isAddingToWatchlist) return;
+    
+    isAddingToWatchlist = true;
+    try {
+      const response = await fetch('/api/watchlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          malId: anime.mal_id,
+          title: anime.title,
+          imageUrl: anime.images.jpg.large_image_url || anime.images.jpg.image_url,
+          status: quickAddStatus,
+          score: quickAddScore || undefined,
+          progress: quickAddProgress || 0,
+          totalEpisodes: anime.episodes || undefined
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.action === 'created') {
+          alert('Anime added to your watch list!');
+        } else if (result.action === 'updated') {
+          alert('Anime updated in your watch list!');
+        }
+      } else {
+        alert('Failed to add anime to watch list');
+      }
+    } catch (error) {
+      console.error('Error adding to watchlist:', error);
+      alert('Error adding anime to watch list');
+    } finally {
+      isAddingToWatchlist = false;
+    }
+  }
 </script>
 
 <div class="bg-gray-50 min-h-screen">
@@ -95,6 +138,55 @@
               </div>
             </div>
           {/if}
+          
+          <!-- Quick Add to Watch List -->
+          <div class="mt-4 bg-white border border-gray-200 p-4 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900 mb-3 text-center">Add to Watch List</h3>
+            <div class="space-y-3">
+              <select
+                bind:value={quickAddStatus}
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              >
+                <option value="plan_to_watch">Plan to Watch</option>
+                <option value="watching">Watching</option>
+                <option value="completed">Completed</option>
+                <option value="on_hold">On Hold</option>
+                <option value="dropped">Dropped</option>
+              </select>
+              
+              <div class="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  step="0.5"
+                  bind:value={quickAddScore}
+                  placeholder="Score"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  bind:value={quickAddProgress}
+                  placeholder="Progress"
+                  class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                />
+              </div>
+              
+              <button
+                on:click={quickAddToWatchlist}
+                disabled={isAddingToWatchlist}
+                class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center"
+              >
+                {#if isAddingToWatchlist}
+                  <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Adding...
+                {:else}
+                  Add to List
+                {/if}
+              </button>
+            </div>
+          </div>
           
           <!-- Info -->
           <div class="mt-6 space-y-3 text-sm">

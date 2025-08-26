@@ -16,10 +16,15 @@
     </p>
     
     {#if user}
-      <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+      <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8 space-y-3 sm:space-y-0 sm:space-x-3">
         <div class="rounded-md shadow">
           <a href="/anime" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
             Browse Anime
+          </a>
+        </div>
+        <div class="rounded-md shadow">
+          <a href="/watchlist" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg md:px-10">
+            My Watch List
           </a>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, integer, text, index, real } from 'drizzle-orm/sqlite-core';
 
 export const user = sqliteTable('user', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -23,3 +23,25 @@ export const anime = sqliteTable('anime', {
   status: text('status', { enum: ["watching", "completed", "on_hold", "dropped", "plan_to_watch"] }).notNull(),
   score: integer('score')
 });
+
+export const userAnimeList = sqliteTable('user_anime_list', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  malId: integer('mal_id').notNull(),
+  title: text('title').notNull(),
+  imageUrl: text('image_url'),
+  status: text('status', { enum: ["watching", "completed", "on_hold", "dropped", "plan_to_watch"] }).notNull().default('plan_to_watch'),
+  score: real('score'),
+  progress: integer('progress').default(0),
+  totalEpisodes: integer('total_episodes'),
+  rewatches: integer('rewatches').default(0),
+  startDate: text('start_date'),
+  finishDate: text('finish_date'),
+  notes: text('notes'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).$defaultFn(() => new Date())
+}, (table) => ({
+  userIdIndex: index('user_id_idx').on(table.userId),
+  malIdIndex: index('mal_id_idx').on(table.malId),
+  statusIndex: index('status_idx').on(table.status)
+}));
