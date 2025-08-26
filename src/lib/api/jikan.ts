@@ -8,6 +8,12 @@ export async function getTopAnime(page: number = 1): Promise<Anime[]> {
   return data.data;
 }
 
+export async function searchAnime(query: string, page: number = 1): Promise<Anime[]> {
+  const response = await fetch(`${BASE_URL}/anime?q=${encodeURIComponent(query)}&page=${page}`);
+  const data: AnimeListResponse = await response.json();
+  return data.data;
+}
+
 export async function getAnimeById(id: string): Promise<AnimeDetails> {
   const response = await fetch(`${BASE_URL}/anime/${id}/full`);
   const { data } = await response.json();
