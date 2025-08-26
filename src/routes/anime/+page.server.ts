@@ -1,8 +1,12 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getTopAnime } from '$lib/api/jikan';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
+  // Require authentication
+  if (!locals.user) {
+    throw redirect(302, '/login');
+  }
   try {
     const page = Number(url.searchParams.get('page')) || 1;
     const animeList = await getTopAnime(page);

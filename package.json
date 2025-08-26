@@ -30,6 +30,10 @@
 	},
 	"dependencies": {
 		"@libsql/client": "^0.14.0",
-		"drizzle-orm": "^0.40.0"
+		"@types/bcryptjs": "^2.4.6",
+		"@types/jsonwebtoken": "^9.0.10",
+		"bcryptjs": "^3.0.2",
+		"drizzle-orm": "^0.40.0",
+		"jsonwebtoken": "^9.0.2"
 	}
 }
