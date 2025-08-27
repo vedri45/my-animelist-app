@@ -9,6 +9,7 @@
   let showAddModal = false;
   let watchlist = data.watchlist;
   let groupedWatchlist = data.groupedWatchlist;
+  let activeTab: StatusType = 'watching';
   
   type StatusType = 'watching' | 'completed' | 'on_hold' | 'dropped' | 'plan_to_watch';
   
@@ -29,8 +30,8 @@
   };
   
   async function handleAnimeAdded(event: CustomEvent<any>) {
-    // Add to the appropriate status group
     const newEntry = event.detail;
+    // Add to the appropriate status group
     const status = newEntry.status as StatusType;
     if (!groupedWatchlist[status]) {
       groupedWatchlist[status] = [];
@@ -47,7 +48,7 @@
     const updatedEntry = event.detail;
     // Remove from old status group
     const oldStatus = watchlist.find(entry => entry.id === updatedEntry.id)?.status as StatusType;
-    if (oldStatus && oldStatus !== updatedEntry.status) {
+    if (oldStatus) {
       groupedWatchlist[oldStatus] = groupedWatchlist[oldStatus].filter(entry => entry.id !== updatedEntry.id);
     }
     
@@ -109,19 +110,52 @@
       </button>
     </div>
   {:else}
-    <div class="space-y-8">
-      {#each Object.entries(groupedWatchlist) as [status, animeList]}
-        {#if animeList.length > 0}
-                  <WatchlistSection
-          {animeList}
-          title={statusLabels[status as StatusType]}
-          colorClass={statusColors[status as StatusType]}
-          on:animeUpdated={handleAnimeUpdated}
-          on:animeDeleted={handleAnimeDeleted}
-        />
+    <div class="border-b border-gray-200">
+    <nav class="-mb-px flex space-x-8 overflow-x-auto">
+      {#each Object.entries(statusLabels) as [status, label]}
+        {#if groupedWatchlist[status as StatusType]?.length > 0}
+          <button
+            class={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === status 
+                ? 'border-indigo-500 text-indigo-600' 
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+            on:click={() => activeTab = status as StatusType}
+          >
+            {label} ({groupedWatchlist[status as StatusType]?.length || 0})
+          </button>
         {/if}
-      {/each}
-    </div>
+    {/each}
+    </nav>
+  </div>
+
+  <div class="mt-6">
+    {#if groupedWatchlist[activeTab]?.length > 0}
+      <WatchlistSection
+        animeList={groupedWatchlist[activeTab]}
+        title={statusLabels[activeTab]}
+        colorClass={statusColors[activeTab]}
+        on:animeUpdated={handleAnimeUpdated}
+        on:animeDeleted={handleAnimeDeleted}
+      />
+    {:else}
+      <div class="text-center py-12 bg-gray-50 rounded-lg">
+        <div class="text-gray-400 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No {statusLabels[activeTab]?.toLowerCase()} anime</h3>
+        <p class="text-gray-500 mb-4">You don't have any anime in this category yet.</p>
+        <button
+          on:click={() => showAddModal = true}
+          class="text-indigo-600 hover:text-indigo-500 font-medium"
+        >
+          Add an anime to get started
+        </button>
+      </div>
+    {/if}
+  </div>
   {/if}
 </div>
 
